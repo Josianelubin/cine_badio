@@ -1,0 +1,485 @@
+{% extends 'films/base.html' %}
+{% load static %}
+
+{% block title %}Recherche - Ciné Badio 2026{% endblock %}
+
+{% block content %}
+<style>
+    /* Styles simples pour la page de recherche */
+    :root {
+        --primary: #667eea;
+        --secondary: #764ba2;
+        --dark: #1a1a2e;
+        --light: #f8f9fa;
+    }
+
+    .search-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 50px 0;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .search-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 10px;
+        background: white;
+        padding: 5px;
+        border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .search-input {
+        flex: 1;
+        border: none;
+        padding: 15px 20px;
+        border-radius: 50px;
+        outline: none;
+        font-size: 1rem;
+    }
+
+    .search-btn {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        padding: 0 30px;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .search-btn:hover {
+        opacity: 0.9;
+    }
+
+    .search-stats {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .stats-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .stats-text h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 5px;
+    }
+
+    .stats-text p {
+        color: #666;
+        margin: 0;
+    }
+
+    .query-badge {
+        background: var(--light);
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    .query-badge i {
+        color: var(--primary);
+        margin-right: 8px;
+    }
+
+    .films-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .film-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .film-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+    }
+
+    .film-poster {
+        height: 350px;
+        overflow: hidden;
+    }
+
+    .film-poster img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .film-info {
+        padding: 20px;
+    }
+
+    .film-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--dark);
+    }
+
+    .film-meta {
+        display: flex;
+        gap: 15px;
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .film-meta i {
+        margin-right: 5px;
+        color: var(--primary);
+    }
+
+    .film-category {
+        display: inline-block;
+        padding: 4px 12px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+    }
+
+    .film-match {
+        font-size: 0.85rem;
+        color: var(--primary);
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+
+    .film-match i {
+        margin-right: 5px;
+        color: #28a745;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--primary);
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.8rem;
+        color: var(--dark);
+        margin-bottom: 15px;
+    }
+
+    .empty-state p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    .btn-clear {
+        display: inline-block;
+        padding: 12px 30px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        border-radius: 25px;
+        text-decoration: none;
+        margin-top: 20px;
+    }
+
+    .btn-clear:hover {
+        opacity: 0.9;
+        color: white;
+    }
+
+    .suggestions {
+        margin-top: 30px;
+        padding: 20px;
+        background: var(--light);
+        border-radius: 10px;
+    }
+
+    .suggestions-title {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .suggestions-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .suggestion-tag {
+        padding: 8px 15px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        color: var(--dark);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .suggestion-tag:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+        .search-header h1 {
+            font-size: 2rem;
+        }
+        
+        .search-form {
+            flex-direction: column;
+            background: transparent;
+        }
+        
+        .search-input {
+            background: white;
+        }
+        
+        .search-btn {
+            padding: 15px;
+            justify-content: center;
+        }
+        
+        .search-stats {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .stats-info {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .films-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- HEADER RECHERCHE -->
+<div class="search-header">
+    <div class="container">
+        <h1><i class="fas fa-search"></i> Rechercher un film</h1>
+        
+        <div class="search-container">
+            <form method="get" action="{% url 'rechercher' %}" class="search-form">
+                <input type="text" 
+                       name="q" 
+                       class="search-input" 
+                       placeholder="Titre, réalisateur, acteur..."
+                       value="{{ query }}"
+                       autofocus>
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i> Rechercher
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    {% if query %}
+        <!-- STATISTIQUES DE RECHERCHE -->
+        <div class="search-stats">
+            <div class="stats-info">
+                <div class="stats-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <div class="stats-text">
+                    <h3>Résultats de recherche</h3>
+                    <p>
+                        {% if films %}
+                            {{ films|length }} film{% if films|length > 1 %}s{% endif %} trouvé{% if films|length > 1 %}s{% endif %}
+                        {% else %}
+                            Aucun résultat trouvé
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="query-badge">
+                <i class="fas fa-search"></i> "{{ query }}"
+            </div>
+        </div>
+
+        <!-- RÉSULTATS -->
+        {% if films %}
+        <div class="films-grid">
+            {% for film in films %}
+            <a href="{% url 'detail_film' film.id %}" class="film-card">
+                <div class="film-poster">
+                    {% if film.poster %}
+                    <img src="{{ film.poster.url }}" alt="{{ film.titre }}">
+                    {% else %}
+                    <div style="background: #eee; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-film fa-3x text-secondary"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="film-info">
+                    <h3 class="film-title">{{ film.titre }}</h3>
+                    
+                    <div class="film-meta">
+                        <span><i class="fas fa-calendar"></i> {{ film.annee_sortie }}</span>
+                        <span><i class="fas fa-clock"></i> {{ film.duree }}min</span>
+                    </div>
+                    
+                    {% if film.categorie %}
+                    <div class="film-category">{{ film.categorie.nom }}</div>
+                    {% endif %}
+                    
+                    <!-- Indique où le match a été trouvé -->
+                    <div class="film-match">
+                        <i class="fas fa-check-circle"></i>
+                        {% if film.titre|lower == query|lower or query|lower in film.titre|lower %}
+                            Correspond dans le titre
+                        {% elif film.realisateur and query|lower in film.realisateur|lower %}
+                            Correspond dans le réalisateur
+                        {% elif film.acteurs and query|lower in film.acteurs|lower %}
+                            Correspond dans les acteurs
+                        {% else %}
+                            Film trouvé
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- AUCUN RÉSULTAT -->
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h3>Aucun film trouvé</h3>
+            <p>
+                Désolé, aucun film ne correspond à votre recherche<br>
+                <strong>"{{ query }}"</strong>
+            </p>
+            
+            <a href="{% url 'rechercher' %}" class="btn-clear">
+                <i class="fas fa-times-circle"></i> Effacer la recherche
+            </a>
+            
+            <!-- Suggestions -->
+            <div class="suggestions">
+                <div class="suggestions-title">
+                    <i class="fas fa-lightbulb"></i> Suggestions :
+                </div>
+                <div class="suggestions-tags">
+                    <a href="?q=action" class="suggestion-tag">Action</a>
+                    <a href="?q=comédie" class="suggestion-tag">Comédie</a>
+                    <a href="?q=drame" class="suggestion-tag">Drame</a>
+                    <a href="?q=sf" class="suggestion-tag">Science-fiction</a>
+                    <a href="?q=2026" class="suggestion-tag">Films 2026</a>
+                    <a href="?q=français" class="suggestion-tag">Films français</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    {% else %}
+        <!-- PAGE INITIALE (sans recherche) -->
+        <div class="empty-state">
+            <i class="fas fa-video"></i>
+            <h3>Que voulez-vous regarder ?</h3>
+            <p>
+                Utilisez la barre de recherche pour trouver un film<br>
+                Par titre, réalisateur, acteur ou catégorie
+            </p>
+            
+            <!-- Suggestions populaires -->
+            <div class="suggestions">
+                <div class="suggestions-title">
+                    <i class="fas fa-fire"></i> Recherches populaires :
+                </div>
+                <div class="suggestions-tags">
+                    <a href="?q=Badio" class="suggestion-tag">Badio</a>
+                    <a href="?q=2026" class="suggestion-tag">2026</a>
+                    <a href="?q=omar sy" class="suggestion-tag">Omar Sy</a>
+                    <a href="?q=action" class="suggestion-tag">Action</a>
+                    <a href="?q=comédie" class="suggestion-tag">Comédie</a>
+                    <a href="?q=drame" class="suggestion-tag">Drame</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mise en évidence du terme recherché dans les titres
+    const query = new URLSearchParams(window.location.search).get('q');
+    if (query) {
+        const titles = document.querySelectorAll('.film-title');
+        titles.forEach(title => {
+            const text = title.textContent;
+            const regex = new RegExp(`(${query})`, 'gi');
+            title.innerHTML = text.replace(regex, '<span style="background: #ffc107; color: #000; padding: 2px 5px; border-radius: 3px;">$1</span>');
+        });
+    }
+});
+</script>
+{% endblock %}

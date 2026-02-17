@@ -1,0 +1,100 @@
+{% extends 'films/base.html' %}
+{% load static %}
+
+{% block title %}{{ film.titre }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            <img src="{{ film.poster.url }}" class="img-fluid rounded" alt="{{ film.titre }}">
+        </div>
+        <div class="col-md-8">
+            <h1>{{ film.titre }}</h1>
+            <div class="mb-3">
+                <span class="badge bg-secondary">{{ film.categorie }}</span>
+                <span class="badge bg-info">{{ film.annee_sortie }}</span>
+                <span class="badge bg-warning text-dark">
+                    <i class="fas fa-star"></i> {{ film.note }}/5
+                </span>
+            </div>
+            
+            <h5>Réalisateur</h5>
+            <p>{{ film.realisateur }}</p>
+            
+            <h5>Acteurs</h5>
+            <p>{{ film.acteurs }}</p>
+            
+            <h5>Synopsis</h5>
+            <p>{{ film.description }}</p>
+            
+            <p><i class="fas fa-clock"></i> Durée: {{ film.duree }} minutes</p>
+        </div>
+    </div>
+    
+    <!-- Lecteur vidéo -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3>Regarder le film</h3>
+            <div class="video-container">
+                {% if film.video %}
+                <video controls width="100%">
+                    <source src="{{ film.video.url }}" type="video/mp4">
+                    Votre navigateur ne supporte pas la lecture de vidéos.
+                </video>
+                {% elif film.video_url %}
+                <iframe width="100%" height="500" 
+                        src="{{ film.video_url }}" 
+                        frameborder="0" 
+                        allowfullscreen>
+                </iframe>
+                {% else %}
+                <div class="alert alert-info">
+                    La vidéo n'est pas encore disponible.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Commentaires -->
+    <div class="row mt-5">
+        <div class="col-md-8">
+            <h3>Commentaires ({{ commentaires.count }})</h3>
+            
+            {% for commentaire in commentaires %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="card-title">{{ commentaire.auteur }}</h6>
+                        <small class="text-muted">{{ commentaire.date|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    <div class="mb-2">
+                        {% for i in "12345"|make_list %}
+                        <i class="fas fa-star{% if forloop.counter <= commentaire.note %} text-warning{% else %} text-muted{% endif %}"></i>
+                        {% endfor %}
+                    </div>
+                    <p class="card-text">{{ commentaire.contenu }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p>Aucun commentaire pour le moment.</p>
+            {% endfor %}
+            
+            <!-- Formulaire de commentaire -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5>Laisser un commentaire</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Envoyer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
