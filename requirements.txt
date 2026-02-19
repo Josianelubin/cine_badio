@@ -4,7 +4,6 @@ certifi==2026.1.4
 cffi==2.0.0
 charset-normalizer==3.4.4
 crispy-bootstrap5==2025.6
-cryptography @ file:///home/builder/.termux-build/python-cryptography/src
 cssselect2==0.8.0
 distlib==0.4.0
 Django==6.0.1
